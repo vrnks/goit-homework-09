@@ -14,31 +14,37 @@ def input_error(func):
             return "Invalid input. Please provide name and phone number separated by a space."
     return inner
 
+
 """Функції обробники команд"""
 
 @input_error
 def handle_hello():
     return "How can I help you?"
 
+# Очищення даних від користувача
+def clean_input(command):
+    command = command.strip().lower()
+    return command.split()
+
 # Функція додавання контакту
 @input_error
 def handle_add(command):
-    _, name, phone = command.split()
-    contacts[name.lower()] = phone
+    _, name, phone = clean_input(command)
+    contacts[name] = phone
     return f"Contact {name} with phone number {phone} has been added."
 
 # Функція зміни номера телефону контакту
 @input_error
 def handle_change(command):
-    _, name, phone = command.split()
-    contacts[name.lower()] = phone
+    _, name, phone = clean_input(command)
+    contacts[name] = phone
     return f"The phone number for contact {name} has been changed to {phone}."
 
 # Функція виведення номера телефону контакту
 @input_error
 def handle_phone(command):
-    _, name = command.split()
-    return f"The phone number for contact {name} is {contacts[name.lower()]}."
+    _, name = clean_input(command)
+    return f"The phone number for contact {name} is {contacts[name]}."
 
 # Функція виведення всіх контактів
 def handle_show_all():
@@ -46,6 +52,23 @@ def handle_show_all():
         return "No contacts found."
     return "\n".join(f"{name}: {phone}" for name, phone in contacts.items())
 
+COMMANDS = {
+    'add': handle_add,
+    'change': handle_change,
+    'phone': handle_phone,
+}
+
+def handle_command(command):
+    if command == 'hello':
+        return handle_hello()
+    elif command == 'show all':
+        return handle_show_all()
+    tokens = command.split()
+    operation = tokens[0].lower()
+    if operation in COMMANDS:
+        return COMMANDS[operation](command)
+    else:
+        return "Invalid command. Please try again."
 
 def main():
     """Цикл запит-відповідь"""
@@ -55,20 +78,7 @@ def main():
         if command in ["good bye", "close", "exit"]:
             print("Good bye!")
             break
-        elif command == "hello":
-            print(handle_hello())
-        elif command == "hello":
-            print("How can I help you?")
-        elif command.startswith("add"):
-            print(handle_add(command))
-        elif command.startswith("change"):
-            print(handle_change(command))
-        elif command.startswith("phone"):
-            print(handle_phone(command))
-        elif command == "show all":
-            print(handle_show_all())
         else:
-            print("Invalid command. Please try again.")
-
+            print(handle_command(command))
 if __name__ == "__main__":
     main()
